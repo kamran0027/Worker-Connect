@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/><title>Find Workers | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <sec:authorize access="isAnonymous()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-light btn-sm ms-2" th:href="@{/auth/register}">Register</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('USER')"><li class="nav-item"><a class="nav-link" th:href="@{/user/dashboard}">Dashboard</a></li></sec:authorize>
+                <sec:authorize access="hasRole('WORKER')"><li class="nav-item"><a class="nav-link" th:href="@{/worker/dashboard}">Dashboard</a></li></sec:authorize>
+                <sec:authorize access="hasRole('ADMIN')"><li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}">Admin</a></li></sec:authorize>
+                <sec:authorize access="isAuthenticated()"><li class="nav-item"><a class="nav-link" th:href="@{/auth/logout}">Logout</a></li></sec:authorize>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <!-- Search Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-search me-2 text-primary"></i>Search Workers</h5>
+            <form th:action="@{/workers/search}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">City</label>
+                    <input type="text" name="city" class="form-control" placeholder="e.g. Mumbai" th:value="${city}"/>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Profession</label>
+                    <input type="text" name="profession" class="form-control" placeholder="e.g. Plumber" th:value="${profession}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Min Price (₹/day)</label>
+                    <input type="number" name="minPrice" class="form-control" th:value="${minPrice}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Max Price (₹/day)</label>
+                    <input type="number" name="maxPrice" class="form-control" th:value="${maxPrice}"/>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Min Rating</label>
+                    <select name="minRating" class="form-select">
+                        <option value="">Any</option>
+                        <option value="4" th:selected="${minRating == 4}">4+ ⭐</option>
+                        <option value="3" th:selected="${minRating == 3}">3+ ⭐</option>
+                        <option value="2" th:selected="${minRating == 2}">2+ ⭐</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary px-4 me-2"><i class="fas fa-search me-1"></i>Search</button>
+                    <a th:href="@{/workers/search}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Categories Quick Filter -->
+    <div class="mb-4 d-flex flex-wrap gap-2">
+        <a th:href="@{/workers/search}" class="btn btn-sm btn-outline-primary">All</a>
+        <a th:each="cat : ${categories}" th:href="@{/workers/category/{id}(id=${cat.id})}"
+           class="btn btn-sm btn-outline-secondary" th:text="${cat.name}"></a>
+    </div>
+
+    <!-- Results -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="text-muted mb-0"><span th:text="${#lists.size(workers ?: {})}">0</span> worker(s) found</h6>
+    </div>
+
+    <div class="row g-4" th:if="${workers != null and !workers.empty}">
+        <div class="col-md-6 col-lg-4" th:each="worker : ${workers}">
+            <div class="card h-100 worker-card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <img th:src="${worker.profileImage != null ? worker.profileImage : '/images/default-worker.png'}"
+                             class="rounded-circle avatar me-3" width="65" height="65" alt="Worker"/>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-0" th:text="${worker.fullName}"></h6>
+                            <small class="text-primary fw-semibold" th:text="${worker.profession}"></small><br/>
+                            <span th:if="${worker.available}" class="badge bg-success mt-1">Available</span>
+                            <span th:unless="${worker.available}" class="badge bg-secondary mt-1">Unavailable</span>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                        <small th:text="${worker.city + (worker.state != null ? ', ' + worker.state : '')}"></small>
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-briefcase text-secondary me-1"></i>
+                        <small><span th:text="${worker.experienceYears}"></span> yrs exp · <span th:text="${worker.category?.name}"></span></small>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <strong th:text="${#numbers.formatDecimal(worker.averageRating,1,1)}">0.0</strong>
+                            <small class="text-muted">(<span th:text="${worker.totalReviews}">0</span>)</small>
+                        </div>
+                        <div>
+                            <span th:if="${worker.dailyRate != null}" class="text-success fw-bold small">₹<span th:text="${worker.dailyRate}"></span>/day</span>
+                            <span th:if="${worker.hourlyRate != null}" class="text-primary fw-bold small ms-1">₹<span th:text="${worker.hourlyRate}"></span>/hr</span>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-3" th:if="${worker.skills != null}"
+                       th:text="${#strings.abbreviate(worker.skills, 60)}"></p>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/workers/{id}(id=${worker.id})}" class="btn btn-outline-primary btn-sm flex-fill">View Profile</a>
+                        <sec:authorize access="hasRole('USER')">
+                            <a th:href="@{/user/book/{id}(id=${worker.id})}" class="btn btn-primary btn-sm flex-fill">Book Now</a>
+                        </sec:authorize>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:if="${workers == null or workers.empty}" class="text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">No workers found</h5>
+        <p class="text-muted">Try adjusting your search filters</p>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Workers | Admin</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link th:href="@{/css/style.css}" rel="stylesheet"/></head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect Admin</a>
+    <div class="ms-auto"><a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm">Logout</a></div>
+  </div>
+</nav>
+<div class="container-fluid"><div class="row">
+<div class="col-md-2 p-0 sidebar d-none d-md-block" style="min-height:100vh;">
+  <nav class="nav flex-column py-3">
+    <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a class="nav-link" th:href="@{/admin/users}"><i class="fas fa-users me-2"></i>Users</a>
+    <a class="nav-link active" th:href="@{/admin/workers}"><i class="fas fa-hard-hat me-2"></i>Workers</a>
+    <a class="nav-link" th:href="@{/admin/bookings}"><i class="fas fa-calendar-check me-2"></i>Bookings</a>
+    <a class="nav-link" th:href="@{/admin/agreements}"><i class="fas fa-file-signature me-2"></i>Agreements</a>
+    <a class="nav-link" th:href="@{/admin/payments}"><i class="fas fa-credit-card me-2"></i>Payments</a>
+    <a class="nav-link" th:href="@{/admin/categories}"><i class="fas fa-tags me-2"></i>Categories</a>
+    <a class="nav-link" th:href="@{/admin/reviews}"><i class="fas fa-star me-2"></i>Reviews</a>
+    <a class="nav-link text-danger mt-4" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+  </nav>
+</div>
+<div class="col-md-10 p-4">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-hard-hat me-2 text-success"></i>Worker Management</h4>
+    <div class="d-flex gap-2">
+      <a th:href="@{/admin/workers}" class="btn btn-sm" th:classappend="${status == null ? 'btn-dark' : 'btn-outline-dark'}">All</a>
+      <a th:href="@{/admin/workers(status=pending)}" class="btn btn-sm" th:classappend="${status == 'pending' ? 'btn-warning' : 'btn-outline-warning'}">Pending</a>
+    </div>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>#</th><th>Name</th><th>Profession</th><th>City</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr th:each="w,i : ${workers}">
+              <td th:text="${i.index+1}"></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <img th:src="${w.profileImage != null ? w.profileImage : '/images/default-worker.png'}" class="rounded-circle" width="36" height="36" style="object-fit:cover" alt=""/>
+                  <div>
+                    <div class="fw-semibold small" th:text="${w.fullName}"></div>
+                    <small class="text-muted" th:text="${w.email}"></small>
+                  </div>
+                </div>
+              </td>
+              <td><small th:text="${w.profession}"></small><br/><small class="text-muted" th:text="${w.category?.name}"></small></td>
+              <td><small th:text="${w.city}"></small></td>
+              <td class="star-rating"><i class="fas fa-star"></i> <span th:text="${#numbers.formatDecimal(w.averageRating,1,1)}"></span></td>
+              <td>
+                <span class="badge"
+                      th:classappend="${w.status != null and w.status.name() == 'APPROVED' ? 'bg-success' : (w.status != null and w.status.name() == 'PENDING_APPROVAL' ? 'bg-warning text-dark' : (w.status != null and w.status.name() == 'REJECTED' ? 'bg-danger' : 'bg-secondary'))}"
+                      th:text="${w.status}"></span>
+              </td>
+              <td>
+                <div class="d-flex gap-1 flex-wrap">
+                  <a th:href="@{/admin/workers/{id}(id=${w.id})}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                  <form th:if="${w.status != null and w.status.name() == 'PENDING_APPROVAL'}" th:action="@{/admin/workers/{id}/approve(id=${w.id})}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-success" title="Approve"><i class="fas fa-check"></i></button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  </form>
+                  <form th:if="${w.status != null and w.status.name() == 'PENDING_APPROVAL'}" th:action="@{/admin/workers/{id}/reject(id=${w.id})}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Reject"><i class="fas fa-times"></i></button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  </form>
+                  <form th:if="${w.status != null and w.status.name() == 'APPROVED'}" th:action="@{/admin/workers/{id}/suspend(id=${w.id})}" method="post" class="m-0" onsubmit="return confirm('Suspend this worker?')">
+                    <button type="submit" class="btn btn-sm btn-warning" title="Suspend"><i class="fas fa-ban"></i></button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  </form>
+                  <form th:action="@{/admin/workers/{id}/delete(id=${w.id})}" method="post" class="m-0" onsubmit="return confirm('Delete this worker?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${workers == null or workers.empty}">
+              <td colspan="7" class="text-center text-muted py-4">No workers found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body></html>

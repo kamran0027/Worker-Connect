@@ -1,0 +1,13 @@
+<!-- Shared admin sidebar snippet — included via th:replace in each page -->
+<nav class="nav flex-column py-3" xmlns:th="http://www.thymeleaf.org">
+    <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a class="nav-link" th:href="@{/admin/users}"><i class="fas fa-users me-2"></i>Users</a>
+    <a class="nav-link" th:href="@{/admin/workers}"><i class="fas fa-hard-hat me-2"></i>Workers</a>
+    <a class="nav-link" th:href="@{/admin/bookings}"><i class="fas fa-calendar-check me-2"></i>Bookings</a>
+    <a class="nav-link" th:href="@{/admin/agreements}"><i class="fas fa-file-signature me-2"></i>Agreements</a>
+    <a class="nav-link" th:href="@{/admin/payments}"><i class="fas fa-credit-card me-2"></i>Payments</a>
+    <a class="nav-link" th:href="@{/admin/categories}"><i class="fas fa-tags me-2"></i>Categories</a>
+    <a class="nav-link" th:href="@{/admin/reviews}"><i class="fas fa-star me-2"></i>Reviews</a>
+    <a class="nav-link" th:href="@{/admin/settings}"><i class="fas fa-cogs me-2"></i>Settings</a>
+    <a class="nav-link text-danger mt-4" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+</nav>

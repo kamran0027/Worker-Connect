@@ -1,0 +1,18 @@
+# Maven build output
+target/
+
+# Uploaded files
+uploads/
+
+# Spring Boot configuration
+src/main/resources/application.properties
+
+# Data initializer
+src/main/java/com/workerconnect/config/DataInitializer.java
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log

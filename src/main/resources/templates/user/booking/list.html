@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>My Bookings | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container"><a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto"><a th:href="@{/user/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a></div>
+    </div>
+</nav>
+<div class="container py-4">
+    <div th:if="${success}" class="alert alert-success alert-dismissible" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    <h4 class="fw-bold mb-4"><i class="fas fa-calendar-check me-2 text-primary"></i>My Bookings</h4>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr>
+                        <th>Booking #</th><th>Worker</th><th>Service</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th>
+                    </tr></thead>
+                    <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td><small class="text-muted" th:text="${b.bookingNumber}"></small></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img th:src="${b.worker.profileImage != null ? b.worker.profileImage : '/images/default-worker.png'}"
+                                     class="rounded-circle" width="32" height="32" style="object-fit:cover"/>
+                                <div>
+                                    <div class="fw-semibold small" th:text="${b.worker.fullName}"></div>
+                                    <small class="text-muted" th:text="${b.worker.profession}"></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><small th:text="${#strings.abbreviate(b.workDescription,35)}"></small></td>
+                        <td><small th:text="${b.bookingDate}"></small></td>
+                        <td class="fw-semibold">₹<span th:text="${b.amount}"></span></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${b.status != null and b.status.name() == 'COMPLETED'} ? 'bg-success' :
+                                                  (${b.status != null and b.status.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                                  (${b.status != null and b.status.name() == 'ACCEPTED'} ? 'bg-primary' :
+                                                  (${b.status != null and (b.status.name() == 'CANCELLED' or b.status.name() == 'REJECTED')} ? 'bg-danger' :
+                                                  (${b.status != null and b.status.name() == 'WORK_STARTED'} ? 'bg-info' : 'bg-secondary'))))"
+                                  th:text="${b.status}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/user/bookings/{id}(id=${b.id})}" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${bookings == null or bookings.empty}">
+                        <td colspan="7" class="text-center text-muted py-4">No bookings found. <a th:href="@{/workers/search}">Find a worker</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

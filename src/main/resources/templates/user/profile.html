@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>My Profile | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto"><a th:href="@{/user/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a></div>
+    </div>
+</nav>
+<div class="container py-4">
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" th:text="${error}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm text-center p-4">
+                <div class="avatar-upload mb-3">
+                    <img th:src="${user.profileImage != null ? user.profileImage : '/images/default-user.png'}"
+                         class="rounded-circle avatar" id="profilePreview" width="110" height="110" alt="Profile"/>
+                    <label for="profileImageInput" class="overlay"><i class="fas fa-camera fa-lg"></i></label>
+                </div>
+                <h5 class="fw-bold" th:text="${user.fullName}"></h5>
+                <p class="text-muted small" th:text="${user.email}"></p>
+                <form th:action="@{/user/profile/image}" method="post" enctype="multipart/form-data" id="imgForm">
+                    <input type="file" id="profileImageInput" name="image" accept="image/*" class="d-none" onchange="document.getElementById('imgForm').submit()"/>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                </form>
+                <div class="mt-3">
+                    <span class="badge bg-primary">Customer</span>
+                    <span class="badge" th:classappend="${user.enabled} ? 'bg-success' : 'bg-danger'" th:text="${user.enabled} ? 'Active' : 'Inactive'"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="fas fa-edit me-2 text-primary"></i>Edit Profile</h6></div>
+                <div class="card-body p-4">
+                    <form th:action="@{/user/profile/update}" method="post">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Full Name</label>
+                                <input type="text" name="fullName" class="form-control" th:value="${user.fullName}" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email (read-only)</label>
+                                <input type="email" class="form-control" th:value="${user.email}" readonly/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone</label>
+                                <input type="tel" name="phone" class="form-control" th:value="${user.phone}"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">City</label>
+                                <input type="text" name="city" class="form-control" th:value="${user.city}"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">State</label>
+                                <input type="text" name="state" class="form-control" th:value="${user.state}"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address</label>
+                                <input type="text" name="address" class="form-control" th:value="${user.address}"/>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-4 px-4 fw-bold">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

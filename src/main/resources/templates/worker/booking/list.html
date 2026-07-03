@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>Bookings | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto">
+            <a th:href="@{/worker/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    <div th:if="${success}" class="alert alert-success alert-dismissible" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    <h4 class="fw-bold mb-4"><i class="fas fa-calendar-check me-2 text-success"></i>My Bookings</h4>
+
+    <!-- Filter tabs -->
+    <ul class="nav nav-pills mb-4">
+        <li class="nav-item"><a class="nav-link active" href="#">All</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Pending</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Accepted</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Completed</a></li>
+    </ul>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr>
+                        <th>Booking #</th><th>Customer</th><th>Description</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th>
+                    </tr></thead>
+                    <tbody>
+                    <tr th:each="b : ${bookings}">
+                        <td><small class="text-muted" th:text="${b.bookingNumber}"></small></td>
+                        <td>
+                            <div class="fw-semibold small" th:text="${b.user.fullName}"></div>
+                            <small class="text-muted" th:text="${b.user.phone}"></small>
+                        </td>
+                        <td><small th:text="${#strings.abbreviate(b.workDescription,35)}"></small></td>
+                        <td>
+                            <small th:text="${b.bookingDate}"></small><br/>
+                            <small class="text-muted" th:text="${b.bookingTime}"></small>
+                        </td>
+                        <td class="fw-semibold">₹<span th:text="${b.amount}"></span></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${b.status != null and b.status.name() == 'COMPLETED'} ? 'bg-success' :
+                                                  (${b.status != null and b.status.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                                  (${b.status != null and b.status.name() == 'ACCEPTED'} ? 'bg-primary' :
+                                                  (${b.status != null and b.status.name() == 'WORK_STARTED'} ? 'bg-info' :
+                                                  (${b.status != null and b.status.name() == 'REJECTED'} ? 'bg-danger' : 'bg-secondary'))))"
+                                  th:text="${b.status}"></span>
+                        </td>
+                        <td><a th:href="@{/worker/bookings/{id}(id=${b.id})}" class="btn btn-sm btn-outline-success">View</a></td>
+                    </tr>
+                    <tr th:if="${bookings == null or bookings.empty}">
+                        <td colspan="7" class="text-center text-muted py-4">No bookings found yet.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

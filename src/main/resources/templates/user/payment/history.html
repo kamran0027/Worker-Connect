@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>Payment History | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto">
+            <a th:href="@{/user/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    <h4 class="fw-bold mb-4"><i class="fas fa-credit-card me-2 text-primary"></i>Payment History</h4>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Booking #</th>
+                            <th>Worker</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${payments}">
+                            <td><small class="text-muted" th:text="${p.transactionId != null ? p.transactionId : '-'}"></small></td>
+                            <td><small th:text="${p.booking.bookingNumber}"></small></td>
+                            <td th:text="${p.booking.worker.fullName}"></td>
+                            <td class="fw-semibold text-success">₹<span th:text="${p.amount}"></span></td>
+                            <td>
+                                <span class="badge bg-secondary" th:text="${p.paymentMethod}"></span>
+                            </td>
+                            <td><small th:text="${p.paymentDate != null ? p.paymentDate : '-'}"></small></td>
+                            <td>
+                                <span class="payment-badge"
+                                      th:classappend="${p.status != null and p.status.name() == 'COMPLETED'} ? 'completed' :
+                                                       (${p.status != null and p.status.name() == 'PENDING'} ? 'pending' :
+                                                       (${p.status != null and p.status.name() == 'FAILED'} ? 'failed' : 'refunded'))"
+                                      th:text="${p.status}"></span>
+                            </td>
+                            <td>
+                                <a th:if="${p.status != null and p.status.name() == 'COMPLETED'}"
+                                   th:href="@{/user/payment/{id}/invoice(id=${p.booking.id})}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${payments == null or payments.empty}">
+                            <td colspan="8" class="text-center text-muted py-4">No payment records found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

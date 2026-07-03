@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>Worker Dashboard | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span th:if="${worker.available}" class="badge bg-light text-success fw-bold">● Available</span>
+            <span th:unless="${worker.available}" class="badge bg-secondary fw-bold">● Unavailable</span>
+            <form th:action="@{/worker/profile/toggle-availability}" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-sm">Toggle Availability</button>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            </form>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar d-none d-md-block">
+            <div class="p-3 text-center border-bottom border-secondary">
+                <img th:src="${worker.profileImage != null ? worker.profileImage : '/images/default-worker.png'}"
+                     class="rounded-circle avatar mb-2" width="60" height="60" alt="Worker"/>
+                <p class="text-white small fw-semibold mb-0" th:text="${worker.fullName}"></p>
+                <small class="text-secondary" th:text="${worker.profession}"></small>
+            </div>
+            <nav class="nav flex-column py-3">
+                <a class="nav-link active" th:href="@{/worker/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+                <a class="nav-link" th:href="@{/worker/bookings}"><i class="fas fa-calendar-check me-2"></i>Bookings</a>
+                <a class="nav-link" th:href="@{/worker/earnings}"><i class="fas fa-wallet me-2"></i>Earnings</a>
+                <a class="nav-link" th:href="@{/worker/reviews}"><i class="fas fa-star me-2"></i>Reviews</a>
+                <a class="nav-link" th:href="@{/worker/profile}"><i class="fas fa-user-edit me-2"></i>Profile</a>
+                <a class="nav-link" th:href="@{/worker/change-password}"><i class="fas fa-key me-2"></i>Password</a>
+                <a class="nav-link text-danger mt-3" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+            </nav>
+        </div>
+        <!-- Main -->
+        <div class="col-md-10 p-4">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <h4 class="fw-bold mb-4">Welcome, <span th:text="${worker.fullName}"></span>!</h4>
+
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-primary text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold" th:text="${totalBookings}">0</div><div class="small">Total Bookings</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-calendar fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-success text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold" th:text="${totalJobsCompleted}">0</div><div class="small">Jobs Completed</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-check-circle fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-warning text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold">₹<span th:text="${totalEarnings}">0</span></div><div class="small">Total Earnings</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-rupee-sign fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-info text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fs-2 fw-bold" th:text="${#numbers.formatDecimal(avgRating,1,1)}">0.0</div>
+                                <div class="small">Avg Rating (<span th:text="${totalReviews}"></span> reviews)</div>
+                            </div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-star fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Bookings Alert -->
+            <div th:with="pending=${bookings.?[status != null and status.name() == 'PENDING']}">
+                <div th:if="${!pending.empty}" class="alert alert-warning d-flex align-items-center mb-4">
+                    <i class="fas fa-bell fa-lg me-3"></i>
+                    <div>You have <strong th:text="${#lists.size(pending)}"></strong> pending booking request(s).
+                        <a th:href="@{/worker/bookings}" class="alert-link ms-1">View Now →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Recent Booking Requests</h6>
+                    <a th:href="@{/worker/bookings}" class="btn btn-sm btn-outline-success">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead><tr><th>Booking #</th><th>Customer</th><th>Description</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                            <tbody>
+                            <tr th:each="b,i : ${bookings}" th:if="${i.index < 6}">
+                                <td><small class="text-muted" th:text="${b.bookingNumber}"></small></td>
+                                <td th:text="${b.user.fullName}"></td>
+                                <td><small th:text="${#strings.abbreviate(b.workDescription,30)}"></small></td>
+                                <td><small th:text="${b.bookingDate}"></small></td>
+                                <td>₹<span th:text="${b.amount}"></span></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${b.status != null and b.status.name() == 'COMPLETED'} ? 'bg-success' :
+                                                          (${b.status != null and b.status.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                                          (${b.status != null and b.status.name() == 'ACCEPTED'} ? 'bg-primary' :
+                                                          (${b.status != null and b.status.name() == 'WORK_STARTED'} ? 'bg-info' : 'bg-secondary')))"
+                                          th:text="${b.status}"></span>
+                                </td>
+                                <td><a th:href="@{/worker/bookings/{id}(id=${b.id})}" class="btn btn-sm btn-outline-success">View</a></td>
+                            </tr>
+                            <tr th:if="${bookings == null or bookings.empty}">
+                                <td colspan="7" class="text-center text-muted py-4">No bookings yet.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

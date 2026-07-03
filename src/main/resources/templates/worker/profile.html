@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>Worker Profile | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto">
+            <a th:href="@{/worker/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" th:text="${error}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs mb-4" id="profileTabs">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#personal">Personal Info</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#professional">Professional</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#documents">Documents</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Personal -->
+        <div class="tab-pane fade show active" id="personal">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm text-center p-4">
+                        <div class="avatar-upload mb-3 d-inline-block">
+                            <img th:src="${worker.profileImage != null ? worker.profileImage : '/images/default-worker.png'}"
+                                 class="rounded-circle avatar" id="profilePreview" width="100" height="100" alt="Worker"/>
+                            <label for="profileImageInput" class="overlay"><i class="fas fa-camera fa-lg"></i></label>
+                        </div>
+                        <h6 class="fw-bold" th:text="${worker.fullName}"></h6>
+                        <small class="text-muted" th:text="${worker.profession}"></small>
+                        <div class="mt-2">
+                            <span th:if="${worker.available}" class="badge bg-success">Available</span>
+                            <span th:unless="${worker.available}" class="badge bg-secondary">Unavailable</span>
+                        </div>
+                        <div class="mt-2 star-rating">
+                            <i class="fas fa-star"></i>
+                            <span th:text="${#numbers.formatDecimal(worker.averageRating,1,1)}"></span>
+                            <small class="text-muted">(<span th:text="${worker.totalReviews}"></span>)</small>
+                        </div>
+                        <form th:action="@{/worker/profile/image}" method="post" enctype="multipart/form-data" id="imgForm">
+                            <input type="file" id="profileImageInput" name="image" accept="image/*" class="d-none" onchange="document.getElementById('imgForm').submit()"/>
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Edit Personal Information</h6></div>
+                        <div class="card-body p-4">
+                            <form th:action="@{/worker/profile/update}" method="post" th:object="${worker}">
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Full Name</label>
+                                        <input type="text" name="fullName" class="form-control" th:value="${worker.fullName}" required/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Phone</label>
+                                        <input type="tel" name="phone" class="form-control" th:value="${worker.phone}"/></div>
+                                    <div class="col-12"><label class="form-label fw-semibold">Address</label>
+                                        <input type="text" name="address" class="form-control" th:value="${worker.address}"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">City</label>
+                                        <input type="text" name="city" class="form-control" th:value="${worker.city}"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">State</label>
+                                        <input type="text" name="state" class="form-control" th:value="${worker.state}"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Category</label>
+                                        <select name="categoryId" class="form-select">
+                                            <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                                    th:text="${cat.name}" th:selected="${worker.category != null and worker.category.id == cat.id}"></option>
+                                        </select></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Profession</label>
+                                        <input type="text" name="profession" class="form-control" th:value="${worker.profession}"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Hourly Rate (₹)</label>
+                                        <input type="number" name="hourlyRate" class="form-control" th:value="${worker.hourlyRate}" step="0.01"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Daily Rate (₹)</label>
+                                        <input type="number" name="dailyRate" class="form-control" th:value="${worker.dailyRate}" step="0.01"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Fixed Rate (₹)</label>
+                                        <input type="number" name="fixedRate" class="form-control" th:value="${worker.fixedRate}" step="0.01"/></div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Experience (Years)</label>
+                                        <input type="number" name="experienceYears" class="form-control" th:value="${worker.experienceYears}" min="0"/>
+                                    </div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Working Days</label>
+                                        <input type="text" name="workingDays" class="form-control" th:value="${worker.workingDays}" placeholder="Mon-Sat"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Working Hours</label>
+                                        <input type="text" name="workingHours" class="form-control" th:value="${worker.workingHours}" placeholder="9AM-6PM"/></div>
+                                    <div class="col-12"><label class="form-label fw-semibold">Skills</label>
+                                        <input type="text" name="skills" class="form-control" th:value="${worker.skills}" placeholder="Pipe repair, Drainage..."/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Specialization</label>
+                                        <input type="text" name="specialization" class="form-control" th:value="${worker.specialization}"/></div>
+                                    <div class="col-md-6"><label class="form-label fw-semibold">Service Area</label>
+                                        <input type="text" name="serviceArea" class="form-control" th:value="${worker.serviceArea}"/></div>
+                                    <div class="col-12"><label class="form-label fw-semibold">Description</label>
+                                        <textarea name="description" class="form-control" rows="3" th:text="${worker.description}"></textarea></div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="available" id="availSwitch" th:checked="${worker.available}"/>
+                                            <label class="form-check-label fw-semibold" for="availSwitch">Currently Available</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success mt-4 px-4 fw-bold">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional -->
+        <div class="tab-pane fade" id="professional">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Professional Details</h6>
+                    <div class="row g-3">
+                        <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Profession</small><span th:text="${worker.profession}"></span></div>
+                        <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Category</small><span th:text="${worker.category?.name}"></span></div>
+                        <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Experience</small><span th:text="${worker.experienceYears} + ' years'"></span></div>
+                        <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Jobs Completed</small><span th:text="${worker.totalJobsCompleted}"></span></div>
+                        <div class="col-12"><small class="text-muted fw-semibold d-block">Skills</small>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span th:each="skill : ${#strings.arraySplit(worker.skills != null ? worker.skills : '', ',')}"
+                                      class="badge bg-light text-dark border px-3 py-2" th:text="${#strings.trim(skill)}"></span>
+                            </div>
+                        </div>
+                        <div class="col-12"><small class="text-muted fw-semibold d-block">About</small><p th:text="${worker.description}" class="mb-0"></p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="tab-pane fade" id="documents">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="fas fa-file-upload me-2 text-primary"></i>Upload Documents</h6></div>
+                <div class="card-body p-4">
+                    <form th:action="@{/worker/profile/documents}" method="post" enctype="multipart/form-data">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 text-center">
+                                    <i class="fas fa-id-card fa-3x text-primary mb-2"></i>
+                                    <h6 class="fw-bold">Aadhaar Card</h6>
+                                    <p class="text-muted small" th:if="${worker.aadhaarCard != null}">
+                                        <i class="fas fa-check-circle text-success me-1"></i>Uploaded</p>
+                                    <input type="file" name="aadhaar" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png"/>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 text-center">
+                                    <i class="fas fa-file-invoice fa-3x text-warning mb-2"></i>
+                                    <h6 class="fw-bold">PAN Card</h6>
+                                    <p class="text-muted small" th:if="${worker.panCard != null}">
+                                        <i class="fas fa-check-circle text-success me-1"></i>Uploaded</p>
+                                    <input type="file" name="pan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png"/>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 text-center">
+                                    <i class="fas fa-certificate fa-3x text-success mb-2"></i>
+                                    <h6 class="fw-bold">Experience Certificate</h6>
+                                    <p class="text-muted small" th:if="${worker.experienceCertificate != null}">
+                                        <i class="fas fa-check-circle text-success me-1"></i>Uploaded</p>
+                                    <input type="file" name="certificate" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png"/>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-4 px-4 fw-bold">
+                            <i class="fas fa-upload me-2"></i>Upload Documents
+                        </button>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

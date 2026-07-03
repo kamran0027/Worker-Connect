@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Agreements | Admin</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link th:href="@{/css/style.css}" rel="stylesheet"/></head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid px-4"><a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect Admin</a>
+    <div class="ms-auto"><a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm">Logout</a></div></div>
+</nav>
+<div class="container-fluid"><div class="row">
+<div class="col-md-2 p-0 sidebar d-none d-md-block" style="min-height:100vh;">
+  <nav class="nav flex-column py-3">
+    <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a class="nav-link" th:href="@{/admin/users}"><i class="fas fa-users me-2"></i>Users</a>
+    <a class="nav-link" th:href="@{/admin/workers}"><i class="fas fa-hard-hat me-2"></i>Workers</a>
+    <a class="nav-link" th:href="@{/admin/bookings}"><i class="fas fa-calendar-check me-2"></i>Bookings</a>
+    <a class="nav-link active" th:href="@{/admin/agreements}"><i class="fas fa-file-signature me-2"></i>Agreements</a>
+    <a class="nav-link" th:href="@{/admin/payments}"><i class="fas fa-credit-card me-2"></i>Payments</a>
+    <a class="nav-link" th:href="@{/admin/categories}"><i class="fas fa-tags me-2"></i>Categories</a>
+    <a class="nav-link" th:href="@{/admin/reviews}"><i class="fas fa-star me-2"></i>Reviews</a>
+    <a class="nav-link text-danger mt-4" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+  </nav>
+</div>
+<div class="col-md-10 p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-file-signature me-2 text-primary"></i>Agreement Management</h4>
+    <span class="badge bg-primary fs-6" th:text="${#lists.size(agreements ?: {})} + ' agreements'"></span>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>ID</th><th>Booking #</th><th>Customer</th><th>Worker</th><th>Amount</th><th>User Signed</th><th>Worker Signed</th><th>Status</th><th>Download</th></tr></thead>
+          <tbody>
+            <tr th:each="a : ${agreements}">
+              <td><small>#<span th:text="${a.id}"></span></small></td>
+              <td><small th:text="${a.booking.bookingNumber}"></small></td>
+              <td><small th:text="${a.userName}"></small></td>
+              <td><small th:text="${a.workerName}"></small></td>
+              <td>₹<span th:text="${a.amount}"></span></td>
+              <td><span th:if="${a.userSigned}" class="text-success"><i class="fas fa-check-circle"></i></span><span th:unless="${a.userSigned}" class="text-muted"><i class="fas fa-clock"></i></span></td>
+              <td><span th:if="${a.workerSigned}" class="text-success"><i class="fas fa-check-circle"></i></span><span th:unless="${a.workerSigned}" class="text-muted"><i class="fas fa-clock"></i></span></td>
+              <td><span class="badge" th:classappend="${a.status != null and a.status.name() == 'BOTH_SIGNED'} ? 'bg-success' : (${a.status != null and a.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-secondary')" th:text="${a.status}"></span></td>
+              <td><a th:href="@{/admin/agreements/{id}/download(id=${a.id})}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></a></td>
+            </tr>
+            <tr th:if="${agreements == null or agreements.empty}">
+              <td colspan="9" class="text-center text-muted py-4">No agreements found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body></html>

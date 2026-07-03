@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>WorkerConnect – Hire Local Workers</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link active" th:href="@{/}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/workers/search}">Find Workers</a></li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <sec:authorize access="isAnonymous()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-light btn-sm ms-2" th:href="@{/auth/register}">Register</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" th:href="@{/auth/register/worker}">Join as Worker</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('USER')">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/user/dashboard}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/logout}">Logout</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('WORKER')">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/worker/dashboard}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/logout}">Logout</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('ADMIN')">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}">Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/logout}">Logout</a></li>
+                </sec:authorize>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section text-white text-center py-5">
+    <div class="container py-4">
+        <h1 class="display-4 fw-bold mb-3">Find Trusted Local Workers</h1>
+        <p class="lead mb-4">Book skilled professionals for all your home and office needs</p>
+        <form action="/workers/search" method="get" class="row g-2 justify-content-center">
+            <div class="col-md-3">
+                <input type="text" name="city" class="form-control form-control-lg" placeholder="Enter city..."/>
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="profession" class="form-control form-control-lg" placeholder="Profession (e.g. Plumber)..."/>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-4">Browse by Category</h2>
+        <div class="row g-3">
+            <div class="col-6 col-md-3 col-lg-2" th:each="cat : ${categories}">
+                <a th:href="@{/workers/category/{id}(id=${cat.id})}" class="text-decoration-none">
+                    <div class="card text-center h-100 category-card border-0 shadow-sm">
+                        <div class="card-body py-3">
+                            <div class="category-icon mb-2">
+                                <i class="fas fa-tools fa-2x text-primary"></i>
+                            </div>
+                            <p class="card-text fw-semibold small mb-0" th:text="${cat.name}">Category</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Top Workers -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">Top Rated Workers</h2>
+            <a th:href="@{/workers/search}" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row g-4" th:if="${topWorkers != null and !topWorkers.empty}">
+            <div class="col-md-6 col-lg-4" th:each="worker : ${topWorkers}">
+                <div class="card h-100 worker-card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <img th:src="${worker.profileImage != null ? worker.profileImage : '/images/default-worker.png'}"
+                                 class="rounded-circle me-3" width="60" height="60" style="object-fit:cover;" alt="Worker"/>
+                            <div>
+                                <h6 class="mb-0 fw-bold" th:text="${worker.fullName}">Name</h6>
+                                <small class="text-muted" th:text="${worker.profession}">Profession</small>
+                                <div>
+                                    <span th:if="${worker.available}" class="badge bg-success">Available</span>
+                                    <span th:unless="${worker.available}" class="badge bg-secondary">Unavailable</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i><span th:text="${worker.city}"></span></span>
+                            <span class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <strong th:text="${#numbers.formatDecimal(worker.averageRating, 1, 1)}">0.0</strong>
+                                <small class="text-muted">(<span th:text="${worker.totalReviews}">0</span>)</small>
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-success fw-bold" th:if="${worker.dailyRate != null}">₹<span th:text="${worker.dailyRate}"></span>/day</span>
+                            <span class="text-primary fw-bold ms-2" th:if="${worker.hourlyRate != null}">₹<span th:text="${worker.hourlyRate}"></span>/hr</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/workers/{id}(id=${worker.id})}" class="btn btn-outline-primary btn-sm flex-fill">View Profile</a>
+                            <sec:authorize access="hasRole('USER')">
+                                <a th:href="@{/user/book/{id}(id=${worker.id})}" class="btn btn-primary btn-sm flex-fill">Book Now</a>
+                            </sec:authorize>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p th:if="${topWorkers == null or topWorkers.empty}" class="text-center text-muted">No workers available yet.</p>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">How It Works</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <div class="step-circle bg-primary text-white mx-auto mb-3">1</div>
+                <h5 class="fw-bold">Search Workers</h5>
+                <p class="text-muted small">Browse workers by city, profession, and rating</p>
+            </div>
+            <div class="col-md-3">
+                <div class="step-circle bg-primary text-white mx-auto mb-3">2</div>
+                <h5 class="fw-bold">Book Service</h5>
+                <p class="text-muted small">Select date, time, and describe your work</p>
+            </div>
+            <div class="col-md-3">
+                <div class="step-circle bg-primary text-white mx-auto mb-3">3</div>
+                <h5 class="fw-bold">Sign Agreement</h5>
+                <p class="text-muted small">Both parties digitally sign the service agreement</p>
+            </div>
+            <div class="col-md-3">
+                <div class="step-circle bg-primary text-white mx-auto mb-3">4</div>
+                <h5 class="fw-bold">Pay Securely</h5>
+                <p class="text-muted small">Pay online via Razorpay or Stripe after completion</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 bg-primary text-white text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-3">Are You a Skilled Worker?</h2>
+        <p class="lead mb-4">Join WorkerConnect and get bookings from customers in your city</p>
+        <a th:href="@{/auth/register/worker}" class="btn btn-light btn-lg fw-bold px-5">Register as Worker</a>
+    </div>
+</section>
+
+<footer class="bg-dark text-light py-4">
+    <div class="container text-center">
+        <p class="mb-0 text-muted small">&copy; 2025 WorkerConnect. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

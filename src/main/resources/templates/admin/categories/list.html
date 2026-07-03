@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Categories | Admin</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link th:href="@{/css/style.css}" rel="stylesheet"/></head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid px-4"><a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect Admin</a>
+    <div class="ms-auto"><a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm">Logout</a></div></div>
+</nav>
+<div class="container-fluid"><div class="row">
+<div class="col-md-2 p-0 sidebar d-none d-md-block" style="min-height:100vh;">
+  <nav class="nav flex-column py-3">
+    <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a class="nav-link" th:href="@{/admin/users}"><i class="fas fa-users me-2"></i>Users</a>
+    <a class="nav-link" th:href="@{/admin/workers}"><i class="fas fa-hard-hat me-2"></i>Workers</a>
+    <a class="nav-link" th:href="@{/admin/bookings}"><i class="fas fa-calendar-check me-2"></i>Bookings</a>
+    <a class="nav-link" th:href="@{/admin/agreements}"><i class="fas fa-file-signature me-2"></i>Agreements</a>
+    <a class="nav-link" th:href="@{/admin/payments}"><i class="fas fa-credit-card me-2"></i>Payments</a>
+    <a class="nav-link active" th:href="@{/admin/categories}"><i class="fas fa-tags me-2"></i>Categories</a>
+    <a class="nav-link" th:href="@{/admin/reviews}"><i class="fas fa-star me-2"></i>Reviews</a>
+    <a class="nav-link text-danger mt-4" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+  </nav>
+</div>
+<div class="col-md-10 p-4">
+  <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" th:text="${error}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0"><i class="fas fa-plus me-2 text-primary"></i>Add Category</h6></div>
+        <div class="card-body p-4">
+          <form th:action="@{/admin/categories/add}" method="post">
+            <div class="mb-3"><label class="form-label fw-semibold">Name *</label>
+              <input type="text" name="name" class="form-control" required placeholder="e.g. Electrician"/></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Description</label>
+              <input type="text" name="description" class="form-control" placeholder="Brief description"/></div>
+            <div class="mb-3"><label class="form-label fw-semibold">Icon (CSS class)</label>
+              <input type="text" name="icon" class="form-control" placeholder="fas fa-bolt"/></div>
+            <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-plus me-2"></i>Add Category</button>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0"><i class="fas fa-tags me-2 text-primary"></i>All Categories</h6>
+          <span class="badge bg-primary" th:text="${#lists.size(categories ?: {})} + ' categories'"></span>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>#</th><th>Name</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr th:each="c,i : ${categories}">
+                <td th:text="${i.index+1}"></td>
+                <td class="fw-semibold" th:text="${c.name}"></td>
+                <td><small class="text-muted" th:text="${c.description}"></small></td>
+                <td><span class="badge" th:classappend="${c.active} ? 'bg-success' : 'bg-secondary'" th:text="${c.active} ? 'Active' : 'Inactive'"></span></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" th:data-bs-target="'#editModal' + ${c.id}"><i class="fas fa-edit"></i></button>
+                    <form th:action="@{/admin/categories/{id}/toggle(id=${c.id})}" method="post" class="m-0">
+                      <button type="submit" class="btn btn-sm" th:classappend="${c.active} ? 'btn-warning' : 'btn-success'" title="Toggle">
+                        <i class="fas" th:classappend="${c.active} ? 'fa-eye-slash' : 'fa-eye'"></i>
+                      </button>
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    </form>
+                    <form th:action="@{/admin/categories/{id}/delete(id=${c.id})}" method="post" class="m-0" onsubmit="return confirm('Delete this category?')">
+                      <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    </form>
+                  </div>
+                  <!-- Edit Modal -->
+                  <div class="modal fade" th:id="'editModal' + ${c.id}" tabindex="-1">
+                    <div class="modal-dialog"><div class="modal-content">
+                      <div class="modal-header"><h6 class="modal-title fw-bold">Edit Category</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                      <form th:action="@{/admin/categories/{id}/update(id=${c.id})}" method="post">
+                        <div class="modal-body">
+                          <div class="mb-3"><label class="form-label fw-semibold">Name</label>
+                            <input type="text" name="name" class="form-control" th:value="${c.name}" required/></div>
+                          <div class="mb-3"><label class="form-label fw-semibold">Description</label>
+                            <input type="text" name="description" class="form-control" th:value="${c.description}"/></div>
+                          <div class="mb-3"><label class="form-label fw-semibold">Icon</label>
+                            <input type="text" name="icon" class="form-control" th:value="${c.icon}"/></div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-primary fw-bold">Save Changes</button>
+                        </div>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                      </form>
+                    </div></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body></html>

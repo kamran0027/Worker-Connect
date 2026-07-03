@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>Admin Dashboard | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect Admin</a>
+        <div class="ms-auto">
+            <span class="text-secondary small me-3"><i class="fas fa-circle text-success me-1"></i>Administrator</span>
+            <a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 p-0 sidebar d-none d-md-block" style="min-height:100vh;">
+            <nav class="nav flex-column py-3">
+                <a class="nav-link active" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+                <a class="nav-link" th:href="@{/admin/users}"><i class="fas fa-users me-2"></i>Users</a>
+                <a class="nav-link" th:href="@{/admin/workers}"><i class="fas fa-hard-hat me-2"></i>Workers</a>
+                <a class="nav-link" th:href="@{/admin/bookings}"><i class="fas fa-calendar-check me-2"></i>Bookings</a>
+                <a class="nav-link" th:href="@{/admin/agreements}"><i class="fas fa-file-signature me-2"></i>Agreements</a>
+                <a class="nav-link" th:href="@{/admin/payments}"><i class="fas fa-credit-card me-2"></i>Payments</a>
+                <a class="nav-link" th:href="@{/admin/categories}"><i class="fas fa-tags me-2"></i>Categories</a>
+                <a class="nav-link" th:href="@{/admin/reviews}"><i class="fas fa-star me-2"></i>Reviews</a>
+                <a class="nav-link" th:href="@{/admin/settings}"><i class="fas fa-cogs me-2"></i>Settings</a>
+                <a class="nav-link text-danger mt-4" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+            </nav>
+        </div>
+        <!-- Main -->
+        <div class="col-md-10 p-4">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" th:text="${success}"><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            <h4 class="fw-bold mb-4">Admin Dashboard</h4>
+
+            <!-- Stat Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-primary text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold" th:text="${totalUsers}">0</div><div class="small">Total Users</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-users fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-success text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold" th:text="${totalWorkers}">0</div><div class="small">Total Workers</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-hard-hat fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-warning text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold" th:text="${activeBookings}">0</div><div class="small">Active Bookings</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-calendar fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card gradient-info text-white p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold">₹<span th:text="${totalRevenue}">0</span></div><div class="small">Total Revenue</div></div>
+                            <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-rupee-sign fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card bg-white p-3 border-start border-warning border-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold text-warning" th:text="${pendingWorkers}">0</div><div class="small text-muted">Pending Approvals</div></div>
+                            <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-user-clock fa-lg"></i></div>
+                        </div>
+                        <a th:href="@{/admin/workers(status=pending)}" class="small text-warning mt-1 d-block">Review now →</a>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card card bg-white p-3 border-start border-success border-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><div class="fs-2 fw-bold text-success" th:text="${completedBookings}">0</div><div class="small text-muted">Completed Jobs</div></div>
+                            <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings & Top Workers -->
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between">
+                            <h6 class="fw-bold mb-0">Recent Bookings</h6>
+                            <a th:href="@{/admin/bookings}" class="btn btn-sm btn-outline-dark">View All</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead><tr><th>Booking #</th><th>User</th><th>Worker</th><th>Amount</th><th>Status</th></tr></thead>
+                                <tbody>
+                                <tr th:each="b : ${recentBookings}">
+                                    <td><small th:text="${b.bookingNumber}"></small></td>
+                                    <td><small th:text="${b.user.fullName}"></small></td>
+                                    <td><small th:text="${b.worker.fullName}"></small></td>
+                                    <td class="fw-semibold">₹<span th:text="${b.amount}"></span></td>
+                                    <td><span class="badge"
+                                              th:classappend="${b.status != null and b.status.name() == 'COMPLETED'} ? 'bg-success' :
+                                                              (${b.status != null and b.status.name() == 'PENDING'} ? 'bg-warning text-dark' :
+                                                              (${b.status != null and b.status.name() == 'ACCEPTED'} ? 'bg-primary' : 'bg-secondary'))"
+                                              th:text="${b.status}"></span></td>
+                                </tr>
+                                <tr th:if="${recentBookings == null or recentBookings.empty}">
+                                    <td colspan="5" class="text-center text-muted py-3">No bookings yet</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between">
+                            <h6 class="fw-bold mb-0">Top Rated Workers</h6>
+                            <a th:href="@{/admin/workers}" class="btn btn-sm btn-outline-dark">View All</a>
+                        </div>
+                        <div class="card-body p-3">
+                            <div th:each="w : ${topWorkers}" class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                                <img th:src="${w.profileImage != null ? w.profileImage : '/images/default-worker.png'}"
+                                     class="rounded-circle" width="42" height="42" style="object-fit:cover" alt=""/>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold small" th:text="${w.fullName}"></div>
+                                    <small class="text-muted" th:text="${w.profession}"></small>
+                                </div>
+                                <div class="star-rating small">
+                                    <i class="fas fa-star"></i>
+                                    <span th:text="${#numbers.formatDecimal(w.averageRating,1,1)}"></span>
+                                </div>
+                            </div>
+                            <p th:if="${topWorkers == null or topWorkers.empty}" class="text-center text-muted small">No workers yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>My Reviews | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto">
+            <a th:href="@{/worker/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    <div class="d-flex align-items-center gap-4 mb-4">
+        <h4 class="fw-bold mb-0"><i class="fas fa-star me-2 text-warning"></i>My Reviews</h4>
+        <div class="star-rating fs-5">
+            <i class="fas fa-star"></i>
+            <strong th:text="${#numbers.formatDecimal(worker.averageRating,1,1)}"></strong>
+            <span class="text-muted fs-6">(<span th:text="${worker.totalReviews}"></span> reviews)</span>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6" th:each="review : ${reviews}">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <img th:src="${review.user.profileImage != null ? review.user.profileImage : '/images/default-user.png'}"
+                                 class="rounded-circle" width="40" height="40" style="object-fit:cover" alt="User"/>
+                            <div>
+                                <div class="fw-bold small" th:text="${review.user.fullName}"></div>
+                                <small class="text-muted" th:text="${review.booking?.bookingDate}"></small>
+                            </div>
+                        </div>
+                        <div class="star-rating">
+                            <span th:each="i : ${#numbers.sequence(1,review.rating)}"><i class="fas fa-star"></i></span>
+                            <span th:each="i : ${#numbers.sequence(review.rating+1,5)}"><i class="far fa-star text-muted"></i></span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-1" th:text="${review.comment}">Review text here.</p>
+                    <small class="text-muted" th:text="${#temporals.format(review.createdAt,'dd MMM yyyy')}"></small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12" th:if="${reviews == null or reviews.empty}">
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-star fa-3x mb-3"></i>
+                <h6>No reviews yet</h6>
+                <p class="small">Complete jobs and ask customers to leave reviews.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

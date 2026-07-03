@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/><title th:text="${worker.fullName + ' | WorkerConnect'}">Worker | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/workers/search}">Find Workers</a></li>
+                <sec:authorize access="isAnonymous()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}">Login</a></li>
+                </sec:authorize>
+                <sec:authorize access="isAuthenticated()">
+                    <sec:authorize access="hasRole('USER')"><li class="nav-item"><a class="nav-link" th:href="@{/user/dashboard}">Dashboard</a></li></sec:authorize>
+                    <sec:authorize access="hasRole('WORKER')"><li class="nav-item"><a class="nav-link" th:href="@{/worker/dashboard}">Dashboard</a></li></sec:authorize>
+                    <sec:authorize access="hasRole('ADMIN')"><li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}">Admin</a></li></sec:authorize>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/logout}">Logout</a></li>
+                </sec:authorize>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Home</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/workers/search}">Workers</a></li>
+            <li class="breadcrumb-item active" th:text="${worker.fullName}"></li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Left: Profile -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center p-4">
+                    <img th:src="${worker.profileImage != null ? worker.profileImage : '/images/default-worker.png'}"
+                         class="rounded-circle avatar mb-3" width="110" height="110" alt="Worker"/>
+                    <h4 class="fw-bold mb-1" th:text="${worker.fullName}"></h4>
+                    <p class="text-primary fw-semibold mb-1" th:text="${worker.profession}"></p>
+                    <p class="text-muted small mb-2"><span th:text="${worker.category?.name}"></span></p>
+                    <span th:if="${worker.available}" class="badge bg-success fs-6 mb-3">Available</span>
+                    <span th:unless="${worker.available}" class="badge bg-secondary fs-6 mb-3">Unavailable</span>
+                    <div class="star-rating fs-5 mb-2">
+                        <i class="fas fa-star"></i>
+                        <strong th:text="${#numbers.formatDecimal(worker.averageRating,1,1)}"></strong>
+                        <span class="text-muted fs-6">(<span th:text="${worker.totalReviews}"></span> reviews)</span>
+                    </div>
+                    <div class="text-muted small mb-3">
+                        <i class="fas fa-briefcase-medical me-1"></i>
+                        <span th:text="${worker.totalJobsCompleted}"></span> jobs completed
+                    </div>
+                    <sec:authorize access="hasRole('USER')">
+                        <a th:href="@{/user/book/{id}(id=${worker.id})}"
+                           class="btn btn-primary w-100 fw-bold py-2">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Now
+                        </a>
+                    </sec:authorize>
+                    <sec:authorize access="isAnonymous()">
+                        <a th:href="@{/auth/login}" class="btn btn-primary w-100 fw-bold py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Book
+                        </a>
+                    </sec:authorize>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Contact Information</h6>
+                    <p class="mb-2"><i class="fas fa-phone text-primary me-2"></i><span th:text="${worker.phone}">N/A</span></p>
+                    <p class="mb-2"><i class="fas fa-envelope text-primary me-2"></i><span th:text="${worker.email}">N/A</span></p>
+                    <p class="mb-2"><i class="fas fa-map-marker-alt text-danger me-2"></i>
+                        <span th:text="${worker.city + (worker.state != null ? ', ' + worker.state : '')}"></span>
+                    </p>
+                    <p class="mb-0" th:if="${worker.serviceArea}">
+                        <i class="fas fa-map text-secondary me-2"></i>
+                        <span th:text="${worker.serviceArea}"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Pricing</h6>
+                    <div th:if="${worker.hourlyRate != null}" class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Hourly Rate</span>
+                        <strong class="text-success">₹<span th:text="${worker.hourlyRate}"></span></strong>
+                    </div>
+                    <div th:if="${worker.dailyRate != null}" class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Daily Rate</span>
+                        <strong class="text-primary">₹<span th:text="${worker.dailyRate}"></span></strong>
+                    </div>
+                    <div th:if="${worker.fixedRate != null}" class="d-flex justify-content-between">
+                        <span class="text-muted">Fixed Rate</span>
+                        <strong class="text-warning">₹<span th:text="${worker.fixedRate}"></span></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Details -->
+        <div class="col-lg-8">
+            <!-- About -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">About</h5>
+                    <p th:text="${worker.description}" class="text-muted">No description provided.</p>
+                    <hr/>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block fw-semibold">Experience</small>
+                            <span th:text="${worker.experienceYears + ' years'}"></span>
+                        </div>
+                        <div class="col-sm-6" th:if="${worker.specialization}">
+                            <small class="text-muted d-block fw-semibold">Specialization</small>
+                            <span th:text="${worker.specialization}"></span>
+                        </div>
+                        <div class="col-sm-6" th:if="${worker.workingDays}">
+                            <small class="text-muted d-block fw-semibold">Working Days</small>
+                            <span th:text="${worker.workingDays}"></span>
+                        </div>
+                        <div class="col-sm-6" th:if="${worker.workingHours}">
+                            <small class="text-muted d-block fw-semibold">Working Hours</small>
+                            <span th:text="${worker.workingHours}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="card border-0 shadow-sm mb-4" th:if="${worker.skills != null}">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Skills</h5>
+                    <div>
+                        <span th:each="skill : ${#strings.arraySplit(worker.skills, ',')}"
+                              class="badge bg-light text-dark border me-1 mb-1 px-3 py-2"
+                              th:text="${#strings.trim(skill)}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Reviews</h5>
+                    <div th:each="review : ${worker.reviews}" th:if="${review.active}" class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between mb-1">
+                            <strong th:text="${review.user.fullName}">User</strong>
+                            <div class="star-rating">
+                                <span th:each="i : ${#numbers.sequence(1,review.rating)}"><i class="fas fa-star"></i></span>
+                                <span th:each="i : ${#numbers.sequence(review.rating+1,5)}"><i class="far fa-star text-muted"></i></span>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-1" th:text="${review.comment}"></p>
+                        <small class="text-muted" th:text="${#temporals.format(review.createdAt,'dd MMM yyyy')}"></small>
+                    </div>
+                    <p th:if="${worker.reviews == null or worker.reviews.empty}" class="text-muted">No reviews yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

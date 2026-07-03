@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>User Detail | Admin</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link th:href="@{/css/style.css}" rel="stylesheet"/></head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect Admin</a>
+    <div class="ms-auto"><a th:href="@{/admin/users}" class="btn btn-outline-light btn-sm me-2">Users</a><a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a></div>
+  </div>
+</nav>
+<div class="container py-4">
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-4">
+        <img th:src="${user.profileImage != null ? user.profileImage : '/images/default-user.png'}" class="rounded-circle avatar mx-auto mb-3" width="100" height="100" alt=""/>
+        <h5 class="fw-bold" th:text="${user.fullName}"></h5>
+        <p class="text-muted small" th:text="${user.email}"></p>
+        <span class="badge" th:classappend="${user.enabled} ? 'bg-success' : 'bg-danger'" th:text="${user.enabled} ? 'Active' : 'Inactive'"></span>
+        <div class="mt-3 d-grid gap-2">
+          <form th:action="@{/admin/users/{id}/toggle-status(id=${user.id})}" method="post">
+            <button type="submit" class="btn w-100" th:classappend="${user.enabled} ? 'btn-warning' : 'btn-success'"
+                    th:text="${user.enabled} ? 'Deactivate User' : 'Activate User'"></button>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          </form>
+          <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" onsubmit="return confirm('Delete this user permanently?')">
+            <button type="submit" class="btn btn-danger w-100">Delete User</button>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">User Information</h6></div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Full Name</small><span th:text="${user.fullName}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Email</small><span th:text="${user.email}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Phone</small><span th:text="${user.phone}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">City</small><span th:text="${user.city}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">State</small><span th:text="${user.state}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Address</small><span th:text="${user.address}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Role</small><span class="badge bg-primary" th:text="${user.role}"></span></div>
+            <div class="col-sm-6"><small class="text-muted fw-semibold d-block">Joined</small><span th:text="${user.createdAt != null ? #temporals.format(user.createdAt,'dd MMM yyyy HH:mm') : ''}"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Booking History (<span th:text="${#lists.size(bookings ?: {})}"></span>)</h6></div>
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Booking #</th><th>Worker</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr th:each="b : ${bookings}">
+                <td><small th:text="${b.bookingNumber}"></small></td>
+                <td><small th:text="${b.worker.fullName}"></small></td>
+                <td>₹<span th:text="${b.amount}"></span></td>
+                <td><span class="badge bg-secondary" th:text="${b.status}"></span></td>
+                <td><small th:text="${b.bookingDate}"></small></td>
+              </tr>
+              <tr th:if="${bookings == null or bookings.empty}"><td colspan="5" class="text-center text-muted py-3">No bookings</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body></html>

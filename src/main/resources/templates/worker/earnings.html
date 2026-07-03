@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><title>Earnings | WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="fas fa-hard-hat me-2"></i>WorkerConnect</a>
+        <div class="ms-auto">
+            <a th:href="@{/worker/dashboard}" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/auth/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    <h4 class="fw-bold mb-4"><i class="fas fa-wallet me-2 text-success"></i>Earnings Dashboard</h4>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card card gradient-success text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><div class="fs-2 fw-bold">₹<span th:text="${totalEarnings}">0</span></div><div class="small">Total Earnings</div></div>
+                    <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-rupee-sign fa-lg"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card gradient-primary text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><div class="fs-2 fw-bold" th:text="${#lists.size(payments ?: {})}">0</div><div class="small">Total Transactions</div></div>
+                    <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-exchange-alt fa-lg"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card gradient-warning text-white p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><div class="fs-2 fw-bold" th:text="${worker.totalJobsCompleted}">0</div><div class="small">Jobs Completed</div></div>
+                    <div class="stat-icon bg-white bg-opacity-25"><i class="fas fa-briefcase fa-lg"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3"><h6 class="fw-bold mb-0">Payment History</h6></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Booking #</th><th>Customer</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <tr th:each="p : ${payments}">
+                        <td><small th:text="${p.booking.bookingNumber}"></small></td>
+                        <td th:text="${p.booking.user.fullName}"></td>
+                        <td class="fw-semibold text-success">₹<span th:text="${p.amount}"></span></td>
+                        <td><span class="badge bg-secondary" th:text="${p.paymentMethod}"></span></td>
+                        <td><small th:text="${p.paymentDate != null ? p.paymentDate : '-'}"></small></td>
+                        <td><span class="payment-badge"
+                                  th:classappend="${p.status != null and p.status.name() == 'COMPLETED'} ? 'completed' : 'pending'"
+                                  th:text="${p.status}"></span></td>
+                    </tr>
+                    <tr th:if="${payments == null or payments.empty}">
+                        <td colspan="6" class="text-center text-muted py-4">No payment records found.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

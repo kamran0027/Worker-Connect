@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle != null ? pageTitle + ' | WorkerConnect' : 'WorkerConnect'}">WorkerConnect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <th:block th:replace="${extraHead}"></th:block>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4" th:href="@{/}">
+            <i class="fas fa-hard-hat me-2"></i>WorkerConnect
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/workers/search}">Find Workers</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <sec:authorize access="isAnonymous()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-light btn-sm ms-2" th:href="@{/auth/register}">Register</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-light btn-sm ms-2" th:href="@{/auth/register/worker}">Join as Worker</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('USER')">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/user/dashboard}"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/user/bookings}"><i class="fas fa-calendar-check me-1"></i>Bookings</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i><sec:authentication property="name"/>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" th:href="@{/user/profile}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" th:href="@{/user/payments}"><i class="fas fa-credit-card me-2"></i>Payments</a></li>
+                            <li><hr class="dropdown-divider"/></li>
+                            <li><a class="dropdown-item" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('WORKER')">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/worker/dashboard}"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/worker/bookings}"><i class="fas fa-list me-1"></i>Bookings</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-hard-hat me-1"></i><sec:authentication property="name"/>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" th:href="@{/worker/profile}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" th:href="@{/worker/earnings}"><i class="fas fa-wallet me-2"></i>Earnings</a></li>
+                            <li><a class="dropdown-item" th:href="@{/worker/reviews}"><i class="fas fa-star me-2"></i>Reviews</a></li>
+                            <li><hr class="dropdown-divider"/></li>
+                            <li><a class="dropdown-item" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('ADMIN')">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/dashboard}"><i class="fas fa-cogs me-1"></i>Admin Panel</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+                    </li>
+                </sec:authorize>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+<div class="container mt-3" th:if="${success != null or error != null or message != null}">
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${message}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle me-2"></i><span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main th:replace="${content}">Content Here</main>
+
+<!-- Footer -->
+<footer class="bg-dark text-light mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5><i class="fas fa-hard-hat me-2"></i>WorkerConnect</h5>
+                <p class="text-muted small">Your trusted platform for finding skilled local workers.</p>
+            </div>
+            <div class="col-md-4">
+                <h6>Quick Links</h6>
+                <ul class="list-unstyled small">
+                    <li><a th:href="@{/}" class="text-muted text-decoration-none">Home</a></li>
+                    <li><a th:href="@{/workers/search}" class="text-muted text-decoration-none">Find Workers</a></li>
+                    <li><a th:href="@{/auth/register/worker}" class="text-muted text-decoration-none">Join as Worker</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Contact</h6>
+                <p class="text-muted small"><i class="fas fa-envelope me-1"></i>support@workerconnect.com</p>
+                <p class="text-muted small"><i class="fas fa-phone me-1"></i>+91 98765 43210</p>
+            </div>
+        </div>
+        <hr class="border-secondary"/>
+        <p class="text-center text-muted small mb-0">&copy; 2025 WorkerConnect. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="${extraScripts}"></th:block>
+</body>
+</html>
