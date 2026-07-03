@@ -8,7 +8,7 @@ uploads/
 src/main/resources/application.properties
 
 # Data initializer
-src/main/java/com/workerconnect/config/DataInitializer.java
+# src/main/java/com/workerconnect/config/DataInitializer.java
 
 # IDE files
 .vscode/

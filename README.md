@@ -36,8 +36,6 @@ spring.mail.password=YOUR_APP_PASSWORD
 razorpay.key.id=YOUR_RAZORPAY_KEY_ID
 razorpay.key.secret=YOUR_RAZORPAY_KEY_SECRET
 
-stripe.api.key=YOUR_STRIPE_SECRET_KEY
-stripe.public.key=YOUR_STRIPE_PUBLIC_KEY
 ```
 
 ### 4. Run
@@ -62,7 +60,7 @@ Open: http://localhost:8080
 - Search workers by city, profession, price, rating
 - Book workers with date, time, description
 - Digital agreement – view & sign
-- Online payment via Razorpay or Stripe
+- Online payment via Razorpay or COD
 - Download invoice (PDF)
 - Download agreement (PDF)
 - Rate & review workers
@@ -122,10 +120,7 @@ src/main/resources/
 2. Get Key ID & Secret from Dashboard → Settings → API Keys
 3. Add to application.properties
 
-### Stripe
-1. Create account at stripe.com
-2. Get keys from Dashboard → Developers → API Keys
-3. Add to application.properties
+
 
 ## Email Setup (Gmail)
 1. Enable 2FA on Gmail
