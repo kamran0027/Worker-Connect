@@ -3,14 +3,20 @@ package com.workerconnect.service;
 import com.workerconnect.dto.BookingDto;
 import com.workerconnect.enums.AgreementStatus;
 import com.workerconnect.enums.BookingStatus;
+import com.workerconnect.enums.NotificationChannel;
+import com.workerconnect.enums.NotificationType;
 import com.workerconnect.model.*;
 import com.workerconnect.repository.*;
+import com.workerconnect.service.notification.NotificationSender;
+import com.workerconnect.service.notification.dto.NotificationRequestDto;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -22,6 +28,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final AgreementRepository agreementRepository;
     private final EmailService emailService;
+    private final NotificationSender notificationSender;
 
     @Transactional
     public Booking createBooking(Long userId, BookingDto dto) {
@@ -66,9 +73,21 @@ public class BookingService {
                 .status(AgreementStatus.PENDING)
                 .build();
         agreementRepository.save(agreement);
-
+        
         emailService.sendBookingConfirmation(user.getEmail(), user.getFullName(), bookingNumber, worker.getFullName());
         emailService.sendBookingRequestToWorker(worker.getEmail(), worker.getFullName(), bookingNumber, user.getFullName());
+        NotificationRequestDto notificationRequest = NotificationRequestDto.builder()
+                .type(NotificationType.BOOKING_CONFIRMATION)
+                .channel(NotificationChannel.EMAIL)
+                .recipient(user.getEmail()) 
+                .data(Map.of(
+                        "userName", user.getFullName(),
+                        "bookingNumber", bookingNumber,
+                        "workerName", worker.getFullName()
+                ))
+                .build();
+                
+        notificationSender.sendNotification(notificationRequest);
 
         return booking;
     }
