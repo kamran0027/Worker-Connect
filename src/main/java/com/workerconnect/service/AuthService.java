@@ -1,14 +1,22 @@
 package com.workerconnect.service;
 
+import com.workerconnect.dto.PasswordRestDto;
 import com.workerconnect.dto.UserRegistrationDto;
 import com.workerconnect.dto.WorkerRegistrationDto;
+import com.workerconnect.enums.NotificationChannel;
+import com.workerconnect.enums.NotificationType;
 import com.workerconnect.enums.Role;
+import com.workerconnect.kafka.KafkaProducer;
 import com.workerconnect.model.Category;
 import com.workerconnect.model.User;
 import com.workerconnect.model.Worker;
 import com.workerconnect.repository.CategoryRepository;
 import com.workerconnect.repository.UserRepository;
 import com.workerconnect.repository.WorkerRepository;
+import com.workerconnect.service.notification.EmailNotificationSender;
+import com.workerconnect.service.notification.NotificationSender;
+import com.workerconnect.service.notification.dto.NotificationRequestDto;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -28,6 +37,11 @@ public class AuthService {
     private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+
+    private final KafkaProducer producer;
+
+    private final NotificationSender notificationSender;
+
 
     @Transactional
     public User registerUser(UserRegistrationDto dto) {
@@ -108,7 +122,21 @@ public class AuthService {
         user.setResetPasswordToken(token);
         user.setResetPasswordExpiry(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
-        emailService.sendPasswordResetEmail(email, token);
+        producer.sendMessage("password-reset",new PasswordRestDto(email,token));
+
+
+        NotificationRequestDto passwordReset=NotificationRequestDto
+                                                                .builder()
+                                                                .channel(NotificationChannel.EMAIL)
+                                                                .type(NotificationType.PASSWORD_RESET)
+                                                                .recipient(email)
+                                                                .data(Map.of(
+                                                                    "token",token
+                                                                ))
+                                                                .build();
+        notificationSender.sendNotification(passwordReset);
+        
+        //emailService.sendPasswordResetEmail(email, token);
     }
 
     @Transactional

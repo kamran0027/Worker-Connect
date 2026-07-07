@@ -60,9 +60,10 @@ public class EmailNotificationSender implements NotificationSender{
             helper.setSubject(email.getSubject());
             helper.setText(email.getBody(), true);
             mailSender.send(message);
+            log.info("Email notification sent to {} for type {}", email.getTo(), request.getType());
 
         } catch (Exception e) {
-            // TODO: handle exception
+            
             log.error("Failed to send email notification: {}", e.getMessage(), e);
         }
     }

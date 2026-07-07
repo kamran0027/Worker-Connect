@@ -11,15 +11,17 @@ import com.workerconnect.service.notification.NotificationSender;
 import com.workerconnect.service.notification.dto.NotificationRequestDto;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BookingService {
 
@@ -74,9 +76,9 @@ public class BookingService {
                 .build();
         agreementRepository.save(agreement);
         
-        emailService.sendBookingConfirmation(user.getEmail(), user.getFullName(), bookingNumber, worker.getFullName());
-        emailService.sendBookingRequestToWorker(worker.getEmail(), worker.getFullName(), bookingNumber, user.getFullName());
-        NotificationRequestDto notificationRequest = NotificationRequestDto.builder()
+        // emailService.sendBookingConfirmation(user.getEmail(), user.getFullName(), bookingNumber, worker.getFullName());
+        // emailService.sendBookingRequestToWorker(worker.getEmail(), worker.getFullName(), bookingNumber, user.getFullName());
+        NotificationRequestDto notificationRequestUser = NotificationRequestDto.builder()
                 .type(NotificationType.BOOKING_CONFIRMATION)
                 .channel(NotificationChannel.EMAIL)
                 .recipient(user.getEmail()) 
@@ -86,8 +88,21 @@ public class BookingService {
                         "workerName", worker.getFullName()
                 ))
                 .build();
-                
-        notificationSender.sendNotification(notificationRequest);
+        NotificationRequestDto notificationRequestWorker = NotificationRequestDto.builder()
+                .type(NotificationType.BOOKING_CONFIRMATION)
+                .channel(NotificationChannel.EMAIL)
+                .recipient(worker.getEmail()) 
+                .data(Map.of(
+                        "workerName", worker.getFullName(),
+                        "bookingNumber", bookingNumber,
+                        "userName", user.getFullName()
+                ))
+                .build();
+        notificationSender.sendNotification(notificationRequestUser);
+        notificationSender.sendNotification(notificationRequestWorker);
+
+        log.info("Booking created with booking number: {} for user: {} and worker: {}", bookingNumber, user.getFullName(), worker.getFullName());
+        
 
         return booking;
     }
