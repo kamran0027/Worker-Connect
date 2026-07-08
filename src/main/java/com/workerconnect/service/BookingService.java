@@ -1,10 +1,12 @@
 package com.workerconnect.service;
 
+import com.workerconnect.dto.AgreementDto;
 import com.workerconnect.dto.BookingDto;
 import com.workerconnect.enums.AgreementStatus;
 import com.workerconnect.enums.BookingStatus;
 import com.workerconnect.enums.NotificationChannel;
 import com.workerconnect.enums.NotificationType;
+import com.workerconnect.kafka.KafkaProducer;
 import com.workerconnect.model.*;
 import com.workerconnect.repository.*;
 import com.workerconnect.service.notification.NotificationSender;
@@ -32,6 +34,8 @@ public class BookingService {
     private final EmailService emailService;
     private final NotificationSender notificationSender;
 
+    private final KafkaProducer producer;
+
     @Transactional
     public Booking createBooking(Long userId, BookingDto dto) {
         User user = userRepository.findById(userId)
@@ -55,26 +59,38 @@ public class BookingService {
                 .status(BookingStatus.PENDING)
                 .build();
 
-        booking = bookingRepository.save(booking);
+                 booking = bookingRepository.save(booking);
+
+        
+
+        
+
+
+       
 
         // Auto-create agreement
-        Agreement agreement = Agreement.builder()
-                .booking(booking)
-                .userName(user.getFullName())
-                .userEmail(user.getEmail())
-                .userPhone(user.getPhone())
-                .userAddress(user.getAddress())
-                .workerName(worker.getFullName())
-                .workerEmail(worker.getEmail())
-                .workerPhone(worker.getPhone())
-                .workerProfession(worker.getProfession())
-                .serviceDescription(dto.getWorkDescription())
-                .amount(dto.getAmount())
-                .startDate(dto.getStartDate())
-                .completionDate(dto.getCompletionDate())
-                .status(AgreementStatus.PENDING)
-                .build();
-        agreementRepository.save(agreement);
+        // Agreement agreement = Agreement.builder()
+        //         .booking(booking)
+        //         .userName(user.getFullName())
+        //         .userEmail(user.getEmail())
+        //         .userPhone(user.getPhone())
+        //         .userAddress(user.getAddress())
+        //         .workerName(worker.getFullName())
+        //         .workerEmail(worker.getEmail())
+        //         .workerPhone(worker.getPhone())
+        //         .workerProfession(worker.getProfession())
+        //         .serviceDescription(dto.getWorkDescription())
+        //         .amount(dto.getAmount())
+        //         .startDate(dto.getStartDate())
+        //         .completionDate(dto.getCompletionDate())
+        //         .status(AgreementStatus.PENDING)
+        //         .build();
+        AgreementDto agreementDto = new AgreementDto(booking.getId(),
+                                                    userId,
+                                                dto.getWorkerId());
+        
+        producer.sendMessage("booking-agreement", agreementDto);
+        // agreementRepository.save(agreement);
         
         // emailService.sendBookingConfirmation(user.getEmail(), user.getFullName(), bookingNumber, worker.getFullName());
         // emailService.sendBookingRequestToWorker(worker.getEmail(), worker.getFullName(), bookingNumber, user.getFullName());

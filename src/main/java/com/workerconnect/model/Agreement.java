@@ -9,10 +9,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "agreements")
-@Data
+
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Getter
 @Builder
+@Data
 public class Agreement {
 
     @Id
