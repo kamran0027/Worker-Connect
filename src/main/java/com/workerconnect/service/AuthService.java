@@ -36,12 +36,7 @@ public class AuthService {
     private final WorkerRepository workerRepository;
     private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
-
     private final KafkaProducer producer;
-
-    private final NotificationSender notificationSender;
-
 
     @Transactional
     public User registerUser(UserRegistrationDto dto) {
@@ -125,18 +120,7 @@ public class AuthService {
         producer.sendMessage("password-reset",new PasswordRestDto(email,token));
 
 
-        NotificationRequestDto passwordReset=NotificationRequestDto
-                                                                .builder()
-                                                                .channel(NotificationChannel.EMAIL)
-                                                                .type(NotificationType.PASSWORD_RESET)
-                                                                .recipient(email)
-                                                                .data(Map.of(
-                                                                    "token",token
-                                                                ))
-                                                                .build();
-        notificationSender.sendNotification(passwordReset);
         
-        //emailService.sendPasswordResetEmail(email, token);
     }
 
     @Transactional

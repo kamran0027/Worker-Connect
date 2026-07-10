@@ -1,17 +1,13 @@
 package com.workerconnect.service;
 
 import com.workerconnect.dto.AgreementDto;
+import com.workerconnect.dto.BookingConfirmationKafkaDto;
 import com.workerconnect.dto.BookingDto;
-import com.workerconnect.enums.AgreementStatus;
 import com.workerconnect.enums.BookingStatus;
-import com.workerconnect.enums.NotificationChannel;
-import com.workerconnect.enums.NotificationType;
 import com.workerconnect.kafka.KafkaProducer;
 import com.workerconnect.model.*;
 import com.workerconnect.repository.*;
 import com.workerconnect.service.notification.NotificationSender;
-import com.workerconnect.service.notification.dto.NotificationRequestDto;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -64,58 +59,16 @@ public class BookingService {
         
 
         
-
-
-       
-
-        // Auto-create agreement
-        // Agreement agreement = Agreement.builder()
-        //         .booking(booking)
-        //         .userName(user.getFullName())
-        //         .userEmail(user.getEmail())
-        //         .userPhone(user.getPhone())
-        //         .userAddress(user.getAddress())
-        //         .workerName(worker.getFullName())
-        //         .workerEmail(worker.getEmail())
-        //         .workerPhone(worker.getPhone())
-        //         .workerProfession(worker.getProfession())
-        //         .serviceDescription(dto.getWorkDescription())
-        //         .amount(dto.getAmount())
-        //         .startDate(dto.getStartDate())
-        //         .completionDate(dto.getCompletionDate())
-        //         .status(AgreementStatus.PENDING)
-        //         .build();
         AgreementDto agreementDto = new AgreementDto(booking.getId(),
                                                     userId,
                                                 dto.getWorkerId());
+
+        BookingConfirmationKafkaDto  bookingConfirmationKafkaDto=new BookingConfirmationKafkaDto(
+            bookingNumber,user.getEmail(),user.getFullName(),worker.getEmail(),worker.getFullName());
         
         producer.sendMessage("booking-agreement", agreementDto);
-        // agreementRepository.save(agreement);
-        
-        // emailService.sendBookingConfirmation(user.getEmail(), user.getFullName(), bookingNumber, worker.getFullName());
-        // emailService.sendBookingRequestToWorker(worker.getEmail(), worker.getFullName(), bookingNumber, user.getFullName());
-        NotificationRequestDto notificationRequestUser = NotificationRequestDto.builder()
-                .type(NotificationType.BOOKING_CONFIRMATION)
-                .channel(NotificationChannel.EMAIL)
-                .recipient(user.getEmail()) 
-                .data(Map.of(
-                        "userName", user.getFullName(),
-                        "bookingNumber", bookingNumber,
-                        "workerName", worker.getFullName()
-                ))
-                .build();
-        NotificationRequestDto notificationRequestWorker = NotificationRequestDto.builder()
-                .type(NotificationType.BOOKING_CONFIRMATION)
-                .channel(NotificationChannel.EMAIL)
-                .recipient(worker.getEmail()) 
-                .data(Map.of(
-                        "workerName", worker.getFullName(),
-                        "bookingNumber", bookingNumber,
-                        "userName", user.getFullName()
-                ))
-                .build();
-        notificationSender.sendNotification(notificationRequestUser);
-        notificationSender.sendNotification(notificationRequestWorker);
+
+        producer.sendMessage("booking-confirmation", bookingConfirmationKafkaDto);
 
         log.info("Booking created with booking number: {} for user: {} and worker: {}", bookingNumber, user.getFullName(), worker.getFullName());
         
