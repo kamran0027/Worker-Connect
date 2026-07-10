@@ -1,6 +1,7 @@
 package com.workerconnect.service;
 
 import com.workerconnect.enums.AgreementStatus;
+import com.workerconnect.enums.BookingStatus;
 import com.workerconnect.model.Agreement;
 import com.workerconnect.model.Booking;
 import com.workerconnect.repository.AgreementRepository;
@@ -39,6 +40,10 @@ public class AgreementService {
     @Transactional
     public Agreement userSign(Long agreementId) {
         Agreement a = findById(agreementId);
+        Booking b=a.getBooking();
+        if(b.getStatus()==BookingStatus.PENDING || b.getStatus()==BookingStatus.REJECTED){
+            throw new RuntimeException("Booking is not in a valid state for signing the agreement");
+        }
         a.setUserSigned(true);
         a.setUserSignedAt(LocalDateTime.now());
         if (a.isWorkerSigned()) {
@@ -52,6 +57,10 @@ public class AgreementService {
     @Transactional
     public Agreement workerSign(Long agreementId) {
         Agreement a = findById(agreementId);
+        Booking b=a.getBooking();
+        if(b.getStatus()==BookingStatus.PENDING || b.getStatus()==BookingStatus.REJECTED){
+            throw new RuntimeException("Booking is not in a valid state for signing the agreement");
+        }
         a.setWorkerSigned(true);
         a.setWorkerSignedAt(LocalDateTime.now());
         if (a.isUserSigned()) {
