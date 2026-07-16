@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <title>Too Many Requests</title>
+
+    <style>
+
+        body{
+            font-family:Arial;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            background:#f5f5f5;
+        }
+
+        .card{
+
+            width:500px;
+            text-align:center;
+            background:white;
+            padding:40px;
+            border-radius:12px;
+            box-shadow:0 0 20px rgba(0,0,0,.1);
+
+        }
+
+        h1{
+
+            color:#dc3545;
+            font-size:70px;
+
+        }
+
+        h2{
+
+            color:#333;
+
+        }
+
+        p{
+
+            color:#777;
+
+        }
+
+        a{
+
+            display:inline-block;
+            margin-top:20px;
+            background:#007bff;
+            color:white;
+            padding:10px 20px;
+            text-decoration:none;
+            border-radius:5px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <h1>429</h1>
+
+    <h2>Too Many Requests</h2>
+
+    <p th:text="${message}"></p>
+
+    <a href="/">Go Home</a>
+
+</div>
+
+</body>
+
+</html>
