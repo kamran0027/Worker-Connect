@@ -1,10 +1,15 @@
 package com.workerconnect.service;
 
 import com.workerconnect.model.Category;
+import com.workerconnect.redis.dto.HomeCategries;
 import com.workerconnect.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,10 +20,23 @@ public class CategoryService {
 
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+
     }
 
-    public List<Category> getActiveCategories() {
-        return categoryRepository.findByActiveTrue();
+    @Cacheable(value ="categories" , key="'allCategories'")
+    public List<HomeCategries> getActiveCategories() {
+
+        System.out.println("***********************************");
+        List<Category> category=categoryRepository.findByActiveTrue();
+
+        List<HomeCategries> redisCategries=new ArrayList<>();
+        for(Category c:category){
+            redisCategries.add(new HomeCategries(c.getId(),c.getName()));
+        }
+        System.out.println("fetch from db-----");
+        System.out.println("*******************************");
+        return redisCategries;
+
     }
 
     public Category findById(Long id) {
