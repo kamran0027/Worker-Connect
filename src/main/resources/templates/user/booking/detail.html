@@ -99,9 +99,6 @@
                                 <a th:href="@{/user/payment/{id}(id=${booking.id})}" class="btn btn-warning fw-bold px-4">
                                     <i class="fas fa-rupee-sign me-2"></i>Online Pay
                                 </a>
-                                <!-- <a th:href="@{/user/payment/stripe/checkout(bookingId=${booking.id})}" class="btn btn-dark fw-bold px-4">
-                                    <i class="fab fa-stripe me-2"></i>CASH
-                                </a> -->
                             </div>
                         </div>
                         <div th:unless="${booking.status != null and (booking.status.name() == 'ACCEPTED' or booking.status.name() == 'COMPLETED' or booking.status.name() == 'WORK_STARTED')}">
