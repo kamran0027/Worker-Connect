@@ -75,6 +75,10 @@
                         <a th:href="@{/user/agreement/{id}/download(id=${agreement.id})}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-download me-1"></i>Download PDF
                         </a>
+                        <a th:href="@{/chat/{id}(id=${booking.id})}" class="btn btn-primary w-100 mt-3">
+                            <i class="fas fa-comments"></i>
+                                Chat with Worker
+                        </a>
                     </div>
                 </div>
             </div>

@@ -118,3 +118,116 @@ thead th { background: #f8fafc; font-weight: 600; font-size: .82rem; text-transf
 .gradient-success { background: linear-gradient(135deg, #16a34a, #15803d); }
 .gradient-warning { background: linear-gradient(135deg, #d97706, #b45309); }
 .gradient-info    { background: linear-gradient(135deg, #0891b2, #0e7490); }
+
+
+/* chat */
+.chat-container{
+    height:80vh;
+    display:flex;
+    flex-direction:column;
+    border-radius:15px;
+    overflow:hidden;
+    background:white;
+}
+
+.chat-header{
+    background:#0d6efd;
+    color:white;
+    padding:15px;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.chat-body{
+
+    flex:1;
+    overflow-y:auto;
+    padding:15px;
+
+    background:#f4f7fb;
+
+    display:flex;
+    flex-direction:column;
+}
+
+.chat-footer{
+
+    display:flex;
+    padding:12px;
+    background:white;
+    border-top:1px solid #ddd;
+
+}
+
+.chat-footer input{
+
+    border-radius:30px;
+
+}
+
+.chat-footer button{
+
+    width:55px;
+    border-radius:50%;
+
+}
+
+.message{
+
+    display:flex;
+    margin-bottom:12px;
+
+}
+
+.message.sent{
+
+    justify-content:flex-end;
+
+}
+
+.message.received{
+
+    justify-content:flex-start;
+
+}
+
+.bubble{
+
+    max-width:70%;
+    padding:12px 15px;
+    border-radius:18px;
+    position:relative;
+
+}
+
+.sent .bubble{
+
+    background:#0d6efd;
+    color:white;
+    border-bottom-right-radius:5px;
+
+}
+
+.received .bubble{
+
+    background:white;
+    color:#333;
+    border-bottom-left-radius:5px;
+    box-shadow:0 1px 5px rgba(0,0,0,.1);
+
+}
+
+.sender{
+
+    font-size:12px;
+    font-weight:bold;
+
+}
+
+.time{
+
+    font-size:11px;
+    opacity:.7;
+    margin-top:5px;
+
+}

@@ -57,6 +57,7 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/chat/**", "/app/**").hasAnyRole("USER","WORKER","ADMIN")
                 .requestMatchers("/worker/**").hasAnyRole("WORKER", "ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
